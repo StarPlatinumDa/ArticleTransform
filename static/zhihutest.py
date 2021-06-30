@@ -7,39 +7,43 @@ import traceback
 import json
 
 
-def getArticle(url):
+def getArticle(url,token):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36'}
 
     text_maker = ht2.HTML2Text()
     text_maker.bypass_tables = False
     text_maker.ignore_links = True
-    aaa = requests.get(url, headers=headers).text
+    try:
+        aaa = requests.get(url, headers=headers).text
+        soup = BeautifulSoup(aaa, 'html.parser')
+        articlename = soup.find('h1', class_='Post-Title').text + '.md'
+        """消除顶部"""
+        soup.find('div', class_='ColumnPageHeader-Wrapper').extract()
+        soup.find('header', class_='Post-Header').extract()
+        """去除点赞"""
+        soup.find('div', class_='Sticky RichContent-actions is-bottom').extract()
+        """去除标签"""
+        soup.find('div', class_='Post-topicsAndReviewer').extract()
+        """消除底部专栏收录评论"""
+        soup.find('div', class_='Post-Sub Post-NormalSub').extract()
+        """消除底部发布时间"""
+        soup.find('div', class_='ContentItem-time').extract()
 
-    soup = BeautifulSoup(aaa, 'html.parser')
-    articlename = soup.find('h1', class_='Post-Title').text + '.md'
-    """消除顶部"""
-    soup.find('div', class_='ColumnPageHeader-Wrapper').extract()
-    soup.find('header', class_='Post-Header').extract()
-    """去除点赞"""
-    soup.find('div', class_='Sticky RichContent-actions is-bottom').extract()
-    """去除标签"""
-    soup.find('div', class_='Post-topicsAndReviewer').extract()
-    """消除底部专栏收录评论"""
-    soup.find('div', class_='Post-Sub Post-NormalSub').extract()
-    """消除底部发布时间"""
-    soup.find('div', class_='ContentItem-time').extract()
+        text1 = text_maker.handle(soup.prettify())
 
-    text1 = text_maker.handle(soup.prettify())
+        """正则表达式去除多余的图片标签"""
+        text1 = re.sub('!\\[\\]\\(data.*\n.*svg>\\)', '', text1)
+        text1 = re.sub('!\\[\\]\\(data.*\n.*\n.*svg>\\)', '', text1)
 
-    """正则表达式去除多余的图片标签"""
-    text1 = re.sub('!\\[\\]\\(data.*\n.*svg>\\)', '', text1)
-    text1 = re.sub('!\\[\\]\\(data.*\n.*\n.*svg>\\)', '', text1)
+        newtext = img_replace(text1,token)
+        # with open(articlename, mode='w', encoding='utf-8') as f:
+        #     f.write(newtext)
+        return newtext
+    except Exception:
+        traceback.print_exc()
 
 
-    newtext=img_replace(text1)
-    with open(articlename, mode='w', encoding='utf-8') as f:
-        f.write(newtext)
 
 def download(url, filename):  # 判断文件是否存在，存在则退出本次循环
     if os.path.exists(filename):
@@ -69,17 +73,17 @@ def download(url, filename):  # 判断文件是否存在，存在则退出本次
             os.remove(filename)
 
 """请求服务器将文章中的url变为服务器里存储的"""
-def upload_img(urllist):
+def upload_img(urllist,token):
     urldict = {'imageUrls': urllist}
     urldict = json.dumps(urldict)
-    tempheaders = {'Authorization': 'd08d95b7cf91448bb825929456f5f4c7',
+    tempheaders = {'Authorization': token,
                    'Content-Type': 'application/json'}
     uploadurl = 'http://sharer.violetfreesia.com:666/sharer-api/save-article-images'
     response = requests.post(url=uploadurl, headers=tempheaders, data=urldict)
     rs = response.json()
     return rs
 
-def img_replace(text):
+def img_replace(text,token):
     # if os.path.exists('pictures') is False:
     #     os.makedirs('pictures')
 
@@ -103,7 +107,8 @@ def img_replace(text):
     for line in li:
         temp = re.findall('http.*\)', line)[0].strip(')')
         urllist.append(temp)
-    rs=upload_img(urllist)
+    rs=upload_img(urllist,token)
+    # print(rs)
     for i in rs:
         print(i,rs[i])
         text=text.replace(i,rs[i])
@@ -115,7 +120,7 @@ if __name__ == '__main__':
     # url = 'https://zhuanlan.zhihu.com/p/378317629'
     url='https://zhuanlan.zhihu.com/p/38366833'
     # url='https://zhuanlan.zhihu.com/p/356987472'
-    getArticle(url)
+    getArticle(url,'0bd70fe3352547548a381200e0a1b6aa')
 
 # #标签
 # for i in soup.find_all('div',class_='Tag Topic'):

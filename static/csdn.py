@@ -5,7 +5,7 @@ import html2text as ht2
 from static.utils import *
 
 
-def getArticle(url,token):
+def getArticle(url):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36'}
 
@@ -56,7 +56,7 @@ def getArticle(url,token):
     text1 = re.sub('\*\*\s', '**', text1)
     text1 = re.sub('\*\*\*\*', '', text1)
 
-    newtext=img_replace(text1,token)
+    newtext=img_replace(text1)
     # with open(articlename, mode='w', encoding='utf-8') as f:
     #     f.write(newtext)
     return newtext
