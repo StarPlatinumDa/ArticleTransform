@@ -1,6 +1,7 @@
 from flask import Flask,request,abort,Response
 from static.zhihutest import getArticle as zhihu_get
 from static.weixinchange import getArticle as wechat_get
+from static.csdn import getArticle as csdn_get
 app = Flask(__name__)
 from flask_cors import CORS#跨域
 
@@ -20,6 +21,10 @@ def deal_url():
 		return {'article': article}
 	elif url.__contains__('weixin.qq'):
 		article = wechat_get(url,token)
+		print('Done!')
+		return {'article': article}
+	elif url.__contains__('csdn.net'):
+		article = csdn_get(url,token)
 		print('Done!')
 		return {'article': article}
 	else:

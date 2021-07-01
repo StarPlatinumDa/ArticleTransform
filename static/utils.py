@@ -3,11 +3,46 @@ import re #正则表达式筛选
 import json
 
 def img_replace(text,token):
-    li = re.findall('!\[.*\)', text)
+    """csdn的图片url会换行"""
+    # csdn1 = re.findall('!\].*\n.*\)', text)
+    # for line in csdn1:
+    #     text=text.replace(line,line.replace('\n',''))
+    #
+    # li = re.findall('!\[.*\)', text)
+    #
+    # urllist = []
+    # for line in li:
+    #     temp = re.findall('http.*\)', line)[0].strip(')')
+    #     urllist.append(temp)
+    #
+    # print(urllist)
+    # print('')
+
+    csdn1 = re.findall('\]\(http.*\n.*\)', text)
+    for line in csdn1:
+        text = text.replace(line, line.replace('\n', ''))
+
+    li = re.findall('\]\(http.*\)', text)
+
     urllist = []
     for line in li:
         temp = re.findall('http.*\)', line)[0].strip(')')
         urllist.append(temp)
+
+    # print(urllist)
+    # print('')
+
+
+    # csdn2 = re.findall('!\[.*\n.*\)', text)
+    # for line in csdn2:
+    #     temp = re.findall('http.*\n.*\)', line)[0].strip(')')
+    #     urllist.append(temp)
+
+
+    # csdn4 = re.findall('!\[.*\)', text)
+    # for line in csdn4:
+    #     temp = re.findall('http.*\n.*\)', line)[0].strip(')')
+    #     urllist.append(temp)
     rs = upload_img(urllist,token)
     for i in rs:
         # print(i, rs[i])

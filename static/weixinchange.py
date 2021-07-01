@@ -44,8 +44,8 @@ def getArticle(url,token):
     soup.find('div', class_='like_comment_primary_inner').extract()
     soup.find('div', class_='qr_code_pc_outer').extract()
     soup.find('div', class_='weui-desktop-popover__desc').extract()
-    for i in soup.findAll('pre'):
-        i.extract()
+    # for i in soup.findAll('pre'):
+    #     i.extract()
 
 
     text1 = text_maker.handle(soup.prettify())
@@ -54,7 +54,11 @@ def getArticle(url,token):
     #先把**asd** **dsadsa**加一个空格再减去一个空格，不然连在一起不符合md规则
     text1 = re.sub('\*\*\s\*', '**  *', text1)
     text1 = re.sub('\*\*\s', '**', text1)
-    text1 = re.sub('\*\*\*\*', '', text1)
+    """csdn pre标签会导致markdown解析图片错误所以处理"""
+    text1 = re.sub('\s\s\s\s!\[\]', '![]', text1)
+    """将包含在pre标签里的图片分离出来"""
+    text1 = re.sub('.!\[\]', '\n![]', text1)
+
 
     newtext=img_replace(text1,token)
     # with open(articlename, mode='w', encoding='utf-8') as f:
@@ -68,7 +72,7 @@ if __name__ == '__main__':
     # url='https://mp.weixin.qq.com/s?__biz=MjM5MjAwODM4MA==&mid=2650851243&idx=1&sn=7ab164a6bf60680d3bf78ff70dd5df52&chksm=bd58b6788a2f3f6e6b31db53709894954aa0c86647f8d394042be0f9ce4f07aa3cc9ad54aed7&token=2028362782&lang=zh_CN#rd'
     url = 'https://mp.weixin.qq.com/s/eyQZhDNFvJus6foa3pzz9Q'
     # url='https://mp.weixin.qq.com/s?__biz=MzA3OTQxNjUwNg==&mid=2651896486&idx=2&sn=8f5049c505fb6e93bc3dbffe4f8918ba&chksm=8457c773b3204e65aa8bdfee779eeefc399d5bdbbdc0e9a4f06189505c757e96223da58be9b5&token=2028362782&lang=zh_CN#rd'
-    getArticle(url)
+    getArticle(url,token='dd2fb0bf452f4f46985e5d926c33f158')
     #
     # text_maker = ht2.HTML2Text()
     # with open('E:\work\文章爬虫\weixin.html', encoding='utf-8')as f:
